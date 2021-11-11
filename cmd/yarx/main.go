@@ -130,7 +130,7 @@ func main() {
 				if strings.Contains(errInfo, "\n") {
 					errInfo = errInfo[:strings.Index(errInfo, "\n")]
 				}
-				fmt.Printf("  - %s%s%s\n", eRule.Filename, blank, errInfo)
+				_, _ = fmt.Fprintf(os.Stderr, "  - %s%s%s\n", eRule.Filename, blank, errInfo)
 			}
 			fmt.Println()
 		}
@@ -156,7 +156,7 @@ func main() {
 		printStatus("- ListenAddr", "http://"+listen)
 		sigCh := make(chan os.Signal, 1)
 		signal.Notify(sigCh, os.Interrupt)
-		go func(){
+		go func() {
 			for range sigCh {
 				fmt.Println()
 				golog.Warnf("received interrupt signal, exiting...")
@@ -164,7 +164,7 @@ func main() {
 			}
 		}()
 		err = http.Serve(lis, handler)
-		if err != nil && err != http.ErrServerClosed && !strings.Contains(err.Error(), "use of closed network connection"){
+		if err != nil && err != http.ErrServerClosed && !strings.Contains(err.Error(), "use of closed network connection") {
 			return err
 		}
 		golog.Infof("server stopped")
@@ -214,7 +214,6 @@ func genBlank(i int) string {
 	}
 	return a
 }
-
 
 func GreenPrintf(format string, a ...interface{}) {
 	target := fmt.Sprintf(format, a...)

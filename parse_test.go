@@ -35,7 +35,7 @@ func TestParseExpression(t *testing.T) {
 	toTest := `
 response.body.bcontains(b"ef775988943825d2871e1cfa75473ec") && 
 response.status == 201 && 
-"root:[x*]?:0:0:".bmatches(response.body) && 
+"root:[x*]:0:0:".bmatches(response.body) && 
 response.headers["location"] == "https://www.du1x3r12.com" && 
 response.headers["Set-Cookie"].contains("new-cookie")`
 	rule := NewMutationRule(newCelContext())
@@ -51,5 +51,6 @@ response.headers["Set-Cookie"].contains("new-cookie")`
 	s1 := make([]byte, 1, 10)
 	s2 := make([]byte, 1, 4)
 	assert.Equal(s1, s2)
-	assert.Equal(string(fakeResp.body), "ef775988943825d2871e1cfa75473ecroot:x:0:0:")
+	val := string(fakeResp.body) == "ef775988943825d2871e1cfa75473ecroot:*:0:0:" || string(fakeResp.body) == "ef775988943825d2871e1cfa75473ecroot:x:0:0:"
+	assert.True(val)
 }

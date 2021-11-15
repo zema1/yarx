@@ -35,8 +35,8 @@ USAGE:
 
 func main() {
 	app := &cli.App{
-		Name:    "yarx",
-		Usage:   "launch a rogue server according yaml pocs",
+		Name:    "Yarx",
+		Usage:   "launch a rogue server according to yaml pocs",
 		Version: "0.1.0",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -55,11 +55,6 @@ func main() {
 				Name:  "\r\t\t\t",
 				Usage: "`\r`",
 			},
-			&cli.StringFlag{
-				Name:  "log-level",
-				Usage: "the logger level, choices are debug, info, warn, error, fatal",
-				Value: "info",
-			},
 			&cli.BoolFlag{
 				Name:    "verbose",
 				Aliases: []string{"V"},
@@ -76,11 +71,9 @@ func main() {
 	}
 	cli.AppHelpTemplate = helpTpl
 	app.Action = func(c *cli.Context) error {
-		logLevel := c.String("log-level")
 		if c.Bool("verbose") {
-			logLevel = "debug"
+			golog.SetLevel("debug")
 		}
-		golog.SetLevel(logLevel)
 		now := time.Now()
 
 		loader := &yarx.Yarx{}
@@ -118,7 +111,7 @@ func main() {
 		//})
 		handler.OnPocMatch(func(e *yarx.ScanEvent) {
 			coloredOutput := pio.Rich(e.String(), pio.Red)
-			golog.Warnf(coloredOutput)
+			golog.Info(coloredOutput)
 		})
 		fmt.Println()
 		if len(errRules) != 0 {
@@ -150,8 +143,7 @@ func main() {
 			dir = pocDir
 		}
 		printStatus("- PocDir", dir)
-		printStatus("- LogLevel", logLevel)
-		printStatus("- PocLoaded", strconv.Itoa(len(loader.Groups())))
+		printStatus("- PocLoaded", strconv.Itoa(len(loader.Chains())))
 		printStatus("- RouteCount", strconv.Itoa(len(handler.Routes())))
 		printStatus("- ListenAddr", "http://"+listen)
 		sigCh := make(chan os.Signal, 1)

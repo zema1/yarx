@@ -13,24 +13,14 @@ import (
 )
 
 type route struct {
-	group   *MutationGroup
-	rule    *MutationRule
+	chain *MutationChain
+	rule  *MutationRule
 	handler http.Handler
 }
 type RegexpHandler struct {
 	routes        []*route
 	onRuleMatches []ScanEventHandleFunc
 	onPocMatches  []ScanEventHandleFunc
-}
-
-func (h *RegexpHandler) HandleGroup(group *MutationGroup) {
-	for _, rule := range group.rules {
-		h.routes = append(h.routes, &route{
-			group:   group,
-			rule:    rule,
-			handler: rule.HTTPHandler(),
-		})
-	}
 }
 
 func (h *RegexpHandler) HandleRule(rule *MutationRule) {
@@ -68,9 +58,9 @@ NextRoute:
 			if !rule.Body.Match(body) {
 				continue NextRoute
 			}
-			rule.group.Lock()
+			rule.Chain.Lock()
 			h.run(route, body, w, r)
-			rule.group.Unlock()
+			rule.Chain.Unlock()
 			return
 		}
 	}
@@ -98,7 +88,7 @@ func (h *RegexpHandler) run(route *route, body []byte, w http.ResponseWriter, r 
 		(&sync.Once{}).Do(func() {
 			e = &ScanEvent{
 				Response:    &fakeResp,
-				PocMatched:  rule.group.Name,
+				PocMatched:  rule.Chain.Name,
 				RuleMatched: rule.Name,
 			}
 			newReq := r.Clone(context.Background())
@@ -114,7 +104,7 @@ func (h *RegexpHandler) run(route *route, body []byte, w http.ResponseWriter, r 
 			fn(getEvent())
 		}
 	}
-	if len(h.onPocMatches) != 0 && rule.group.IsLast(rule) {
+	if len(h.onPocMatches) != 0 && rule.Chain.IsLast(rule) {
 		for _, fn := range h.onPocMatches {
 			fn(getEvent())
 		}
@@ -268,7 +258,7 @@ func mergeRules(rules []*MutationRule) []*MutationRule {
 				}
 				// todo: how to do this?
 				baseRule.Name += "||" + targetRule.Name
-				baseRule.group.Name += "||" + targetRule.group.Name
+				baseRule.Chain.Name += "||" + targetRule.Chain.Name
 				newRules[j] = nil
 			}
 		}

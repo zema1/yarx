@@ -62,7 +62,7 @@ type MutationRule struct {
 	ExprInfo *expr.SourceInfo
 	YamlRule *YamlRule
 
-	group *MutationGroup
+	Chain *MutationChain
 	cel   *celContext
 	level int
 }
@@ -74,7 +74,7 @@ func NewMutationRule(celCtx *celContext) *MutationRule {
 }
 
 func (m *MutationRule) String() string {
-	return m.group.Name + "-" + m.Name
+	return m.Chain.Name + "-" + m.Name
 }
 
 func (m *MutationRule) Match(req *http.Request, celCtx *celContext) error {
@@ -179,7 +179,7 @@ func newCelContext() *celContext {
 	}
 }
 
-type MutationGroup struct {
+type MutationChain struct {
 	sync.Mutex
 	Name         string
 	pattern      []string
@@ -188,15 +188,15 @@ type MutationGroup struct {
 	lock         chan struct{}
 }
 
-func (g *MutationGroup) IsLast(rule *MutationRule) bool {
+func (g *MutationChain) IsLast(rule *MutationRule) bool {
 	return rule.level == len(g.rules)-1
 }
 
-func (g *MutationGroup) IsFirst(rule *MutationRule) bool {
+func (g *MutationChain) IsFirst(rule *MutationRule) bool {
 	return rule.level == 0
 }
 
-//func (g *MutationGroup) IsNextRun(uri string, rule *MutationRule) bool {
+//func (g *MutationChain) IsNextRun(uri string, rule *MutationRule) bool {
 //	subData := rule.reSubMatchMap(rule.URI, uri, rule.cel)
 //	for k, v := range subData {
 //		existValue := rule.cel.eval[k]
@@ -208,8 +208,8 @@ func (g *MutationGroup) IsFirst(rule *MutationRule) bool {
 //}
 
 type Yarx struct {
-	mu sync.RWMutex
-	groups []*MutationGroup
+	mu     sync.RWMutex
+	chains []*MutationChain
 }
 
 func (y *Yarx) ParseFile(path string) error {
@@ -230,7 +230,7 @@ func (y *Yarx) Parse(pocData []byte) error {
 		return err
 	}
 
-	group := &MutationGroup{
+	chain := &MutationChain{
 		currentLevel: -1,
 		Name:         poc.Name,
 		lock:         make(chan struct{}, 1),
@@ -258,7 +258,7 @@ func (y *Yarx) Parse(pocData []byte) error {
 	evalMap := make(map[string]interface{})
 	executePath, err := y.getShortestPath(&poc)
 	golog.Debugf("shortest pattern: %v", executePath)
-	group.pattern = executePath
+	chain.pattern = executePath
 	for level, ruleName := range executePath {
 		rule, ok := poc.Rules[ruleName]
 		if !ok {
@@ -273,7 +273,7 @@ func (y *Yarx) Parse(pocData []byte) error {
 			eval:       evalMap,
 		})
 		mutateRule.YamlRule = rule
-		mutateRule.group = group
+		mutateRule.Chain = chain
 		mutateRule.level = level
 		mutateRule.Name = ruleName
 		mutateRule.cel.vafDefines = varDefines
@@ -284,11 +284,11 @@ func (y *Yarx) Parse(pocData []byte) error {
 			return fmt.Errorf("generate mutation rules error: %w", err)
 		}
 		varDefines = mutateRule.cel.vafDefines
-		group.rules = append(group.rules, mutateRule)
+		chain.rules = append(chain.rules, mutateRule)
 	}
 	y.mu.Lock()
 	defer y.mu.Unlock()
-	y.groups = append(y.groups, group)
+	y.chains = append(y.chains, chain)
 	return nil
 }
 
@@ -304,18 +304,18 @@ func (y *Yarx) parseExpr(expression string, rule *MutationRule) error {
 	return y.walkExpr(parsed.GetExpr(), rule)
 }
 
-func (y *Yarx) Groups() []*MutationGroup {
+func (y *Yarx) Chains() []*MutationChain {
 	y.mu.RLock()
 	defer y.mu.RUnlock()
-	return append(y.groups[0:0], y.groups...)
+	return append(y.chains[0:0], y.chains...)
 }
 
 func (y *Yarx) Rules() []*MutationRule {
 	y.mu.RLock()
 	defer y.mu.RUnlock()
-	ret := make([]*MutationRule, 0, len(y.groups))
-	for _, group := range y.groups {
-		for _, rule := range group.rules {
+	ret := make([]*MutationRule, 0, len(y.chains))
+	for _, chain := range y.chains {
+		for _, rule := range chain.rules {
 			ret = append(ret, rule)
 		}
 	}
@@ -690,7 +690,7 @@ func (y *Yarx) onEqualLike(curExpr *expr.Expr, rule *MutationRule) error {
 			return err
 		}
 		if rule.Status != 0 && rule.Status != status {
-			golog.Warnf("status may be conflict %d and %d in %s", rule.Status, status, rule.group.Name)
+			golog.Warnf("status may be conflict %d and %d in %s", rule.Status, status, rule.Chain.Name)
 		}
 		rule.Status = status
 		return nil

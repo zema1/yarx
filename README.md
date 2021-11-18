@@ -1,5 +1,5 @@
 <div align="center">
-<img src="./.github/images/logo.png" alt="Logo" height="140">
+<img src="assets/images/logo.png" alt="Logo" height="140">
 </div>
 
 <p align="center">
@@ -13,7 +13,7 @@ Yarx 来自于 `x-r-a-y` 的反向拼写，它能够根据 xray 的 yaml poc 规
 
 
 
-![yarx-core](./.github/images/core.svg)
+![yarx-core](assets/images/core.svg)
 
 
 
@@ -29,7 +29,7 @@ Yarx 来自于 `x-r-a-y` 的反向拼写，它能够根据 xray 的 yaml poc 规
 
 加载 xray 仓库 poc 并使用 xray 1.8.2 版本扫描结果如下：
 
-![yarx-running.gif](./.github/images/yarx-running.gif)
+![yarx-running.gif](assets/images/yarx-running.gif)
 
 ## 使用场景
 
@@ -66,7 +66,7 @@ Yarx 的使用非常简单，你只需指定一个包含 yaml poc 的文件夹�
 # 创建一个 8080 端口的 http server 模拟 pocs 文件夹中的所有漏洞
 ./yarx -p ./pocs -l 0.0.0.0:8080
 ```
-![running](./.github/images/running.png)
+![running](assets/images/running.png)
 
 你可以使用本仓库的 [pocs](./pocs) 文件夹，也可以直接使用 xray 官方仓库的 [https://github.com/chaitin/xray/tree/master/pocs](https://github.com/chaitin/xray/tree/master/pocs) 文件夹。本仓库仅仅是去掉了暂时不支持的 poc，后者除了在运行时会打印一点错误信息之外没有任何区别，我会定期同步数据来增加更多 poc。当然，你也可以指定自己编写的 poc。
 

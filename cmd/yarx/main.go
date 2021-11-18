@@ -52,6 +52,11 @@ func main() {
 				Value:   "127.0.0.1:7788",
 			},
 			&cli.StringFlag{
+				Name:    "root",
+				Aliases: []string{"r"},
+				Usage:   "load files form this directory if the requested path is not found",
+			},
+			&cli.StringFlag{
 				Name:  "\r\t\t\t",
 				Usage: "`\r`",
 			},
@@ -113,6 +118,9 @@ func main() {
 			coloredOutput := pio.Rich(e.String(), pio.Red)
 			golog.Info(coloredOutput)
 		})
+		if c.String("root") != "" {
+			handler.SetStaticDir(c.String("root"))
+		}
 		fmt.Println()
 		if len(errRules) != 0 {
 			maxLength := getMaxLineLength(errRules) + 2
@@ -166,8 +174,6 @@ func main() {
 	if err := app.Run(os.Args); err != nil {
 		RedPrintf(err.Error())
 	}
-
-	//toCheck := []string{"activemq-default-password.yml", "rabbitmq-default-password.yml"}
 }
 
 type ErrorRule struct {

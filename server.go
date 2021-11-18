@@ -13,11 +13,12 @@ import (
 )
 
 type route struct {
-	chain *MutationChain
-	rule  *MutationRule
+	chain   *MutationChain
+	rule    *MutationRule
 	handler http.Handler
 }
 type RegexpHandler struct {
+	fileServer    http.Handler
 	routes        []*route
 	onRuleMatches []ScanEventHandleFunc
 	onPocMatches  []ScanEventHandleFunc
@@ -28,6 +29,10 @@ func (h *RegexpHandler) HandleRule(rule *MutationRule) {
 		rule:    rule,
 		handler: rule.HTTPHandler(),
 	})
+}
+
+func (h *RegexpHandler) SetStaticDir(path string) {
+	h.fileServer = http.FileServer(http.Dir(path))
 }
 
 func (h *RegexpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +69,12 @@ NextRoute:
 			return
 		}
 	}
-	http.NotFound(w, r)
+	if h.fileServer != nil {
+		h.fileServer.ServeHTTP(w, r)
+	} else {
+		w.WriteHeader(200)
+		w.Write([]byte("Yarx started. Get more info on https://github.com/zema1/yarx"))
+	}
 }
 
 func (h *RegexpHandler) run(route *route, body []byte, w http.ResponseWriter, r *http.Request) {

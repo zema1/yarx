@@ -3,6 +3,7 @@ package yarx
 import (
 	"bytes"
 	"context"
+	"embed"
 	"github.com/kataras/golog"
 	"io/ioutil"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"text/template"
 )
 
 type route struct {
@@ -20,6 +22,7 @@ type route struct {
 type RegexpHandler struct {
 	fileServer    http.Handler
 	routes        []*route
+	chainsBackup  []*MutationChain
 	onRuleMatches []ScanEventHandleFunc
 	onPocMatches  []ScanEventHandleFunc
 }
@@ -33,6 +36,31 @@ func (h *RegexpHandler) HandleRule(rule *MutationRule) {
 
 func (h *RegexpHandler) SetStaticDir(path string) {
 	h.fileServer = http.FileServer(http.Dir(path))
+}
+
+type pocInfo struct {
+	Name string
+	URI  []string
+}
+
+//go:embed assets/html
+var indexFileFS embed.FS
+var indexTemplate = template.Must(template.ParseFS(indexFileFS, "assets/html/*.gohtml"))
+
+func (h *RegexpHandler) handleIndex(w http.ResponseWriter, r *http.Request) {
+	var data []*pocInfo
+	for _, chain := range h.chainsBackup {
+		var info pocInfo
+		for _, rule := range chain.rules {
+			info.URI = append(info.URI, rule.Method + " " +  rule.ReplacedURI)
+		}
+		info.Name = chain.Name
+		data = append(data, &info)
+	}
+	err := indexTemplate.ExecuteTemplate(w, "index.gohtml", data)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+	}
 }
 
 func (h *RegexpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -72,8 +100,12 @@ NextRoute:
 	if h.fileServer != nil {
 		h.fileServer.ServeHTTP(w, r)
 	} else {
-		w.WriteHeader(200)
-		w.Write([]byte("Yarx started. Get more info on https://github.com/zema1/yarx"))
+		if r.URL.Path == "" || r.URL.Path == "/" {
+			h.handleIndex(w, r)
+		} else {
+			w.WriteHeader(404)
+			w.Write([]byte("not found"))
+		}
 	}
 }
 
@@ -193,6 +225,7 @@ func (y *Yarx) HTTPHandler() *RegexpHandler {
 	})
 	handlerRules = mergeRules(handlerRules)
 	handler := &RegexpHandler{}
+	handler.chainsBackup = y.Chains()
 	for _, rule := range handlerRules {
 		handler.HandleRule(rule)
 	}

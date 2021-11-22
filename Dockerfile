@@ -9,7 +9,7 @@ ENV GO111MODULE=on \
 
 COPY . .
 
-RUN CGO_ENABLED=0 go build -ldflags="-s -w -extldflags=-static" cmd/yarx
+RUN CGO_ENABLED=0 go build -ldflags="-s -w -extldflags=-static" ./cmd/yarx
 
 
 
@@ -19,10 +19,10 @@ WORKDIR /app
 
 COPY --from=builder /app/yarx /app/yarx
 ADD ./pocs /app/pocs
-ADD ./assets/html /app/html
 
 EXPOSE 8080
 
 ENTRYPOINT ["./yarx"]
+VOLUME /html
 
 CMD ["-p", "./pocs", "-l", "0.0.0.0:8080", "-r", "./html"]

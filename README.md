@@ -27,44 +27,53 @@ Yarx 来自于 `x-r-a-y` 的反向拼写，它能够根据 xray 的 yaml poc 规
 + 平铺式规则处理逻辑，支持并发扫描
 + 支持捕获扫描事件做进一步分析联动
 
-加载 xray 仓库 poc 并使用 xray 1.8.2 版本扫描结果如下：
-
-![yarx-running.gif](assets/images/yarx-running.gif)
-
-## 使用场景
-
-+ 作为**蜜罐**服务，精准探测 xray 的扫描态势
-+ 作为**反制**服务，有效干扰 xray 正常的漏洞扫描
-+ 作为**测试**服务，检测 xray 的运行是否正常
-
-## 安装
-
-建议直接从 [Release](https://github.com/zema1/yarx/releases) 中下载对应平台二进制文件，解压后在命令行直接使用无需安装。
-
-如果需要自行构建，clone 仓库进入目录并运行编译命令即可在目录中生成一个二进制文件。
+## 立即尝试
 
 ```bash
- GO111MODULE=on go build ./cmd/yarx/
+./xray webscan --plugins phantasm --html-output yarx.html --url https://yarx.koalr.me
 ```
+
+![running](./assets/images/scan.gif)
+
+几秒钟后你就会得到一个类似的漏洞报告:  [report.html](https://yarx.koalr.me/report.html)
+
+
+## 安装
++ Github Release
+
+  [https://github.com/zema1/yarx/releases](https://github.com/zema1/yarx/releases)
+  下载合适的版本然后从命令行运行即可
+
++ 源码安装
+  ```bash
+  git clone https://github.com/zema1/yarx
+  cd yarx
+  go build -o yarx ./cmd/yarx
+  ```
+
 ## 用法
 
 ```bash
 USAGE:
-   ./yarx [global options] [arguments...]
+   yarx [global options] [arguments...]
 
 GLOBAL OPTIONS:
    --pocs value, -p value    load pocs from this dir
    --listen value, -l value  the http server listen address (default: "127.0.0.1:7788")
+   --root value, -r value    load files form this directory if the requested path is not found
 
    --verbose, -V             verbose mode, which is  equivalent to --log-level debug (default: false)
    --help, -h                show help (default: false)
 ```
 
-Yarx 的使用非常简单，你只需指定一个包含 yaml poc 的文件夹并指定一个 http 服务的监听地址，Yarx 就会自动的加载文件夹中所有的 poc 规则并绑定到 server 的处理函数中。
+使用示例：
 
 ```bash
-# 创建一个 8080 端口的 http server 模拟 pocs 文件夹中的所有漏洞
+# 在8080端口创建一个 http 服务，这个服务将模拟 pocs 文件夹下的所有漏洞
 ./yarx -p ./pocs -l 0.0.0.0:8080
+
+# 和上面类似，但当路径不存在时，会从 `./www/html` 加载文件
+./yarx -p ./pocs -l 0.0.0.0:8080 -r ./www/html
 ```
 ![running](assets/images/running.png)
 
@@ -128,13 +137,6 @@ Yarx 在解析 poc 的过程中可能会出现错误，这些 poc 不会被加�
 
 ## 规划
 
-- [ ] 支持自定义未找到路径的目录
 - [ ] 支持 Docker 一键部署
 - [ ] 支持依赖反连平台的 POC
 - [ ] 支持依赖 request 的 POC
-
-## 更新日志
-
-* 0.1
-    * 第一版发布
-

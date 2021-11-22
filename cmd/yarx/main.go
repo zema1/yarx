@@ -21,6 +21,15 @@ import (
 )
 
 const helpTpl = `
+_____.___.                    
+\__  |   |____ __________  ___
+ /   |   \__  \\_  __ \  \/  /
+ \____   |/ __ \|  | \/>    < 
+ / ______(____  /__|  /__/\_ \
+ \/           \/            \/ - v{{.Version}}
+
+Github: https://github.com/zema1/yarx
+
 {{.Name}} {{if .Usage}} - {{.Usage}}{{end}}
 
 USAGE:

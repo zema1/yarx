@@ -41,7 +41,7 @@ func variableToRegexp(template string, varContext map[string]interface{}, withRa
 				namedGroup := fmt.Sprintf(`(?P<%s>\w+)`, arr[1])
 				// 这里不能直接替换，因为数据中的 ? . () 之类的不应该被视为正则, 这里用占位符先弄一下，后面转义后再替换
 				// 这个占位符既不能是正则中的字符，也不能是 url 需要转移的字符
-				placeholder := fmt.Sprintf(`---ko--%d--cw---`, i)
+				placeholder := fmt.Sprintf(`---variable-%d---`, i)
 				replaceMap[placeholder] = namedGroup
 				template = strings.Replace(template, arr[0], placeholder, 1)
 			}

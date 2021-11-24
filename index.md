@@ -1,13 +1,3 @@
-<div align="center">
-<img src="assets/images/logo.png" alt="Logo" height="140">
-</div>
-
-<p align="center">
-    <a href="#"><b>Demo</b></a>&nbsp;&nbsp;&nbsp;
-    <a href="#"><b>Report</b></a> 
-</p>
-
-
 Yarx comes from the reverse spelling of `x-r-a-y`, and it can fully automatically generate a Server that satisfies the rules according to xray's yaml poc rules. Scanning the server with xray will get a dozen of  corresponding vulnerabilities.
 
 ![yarx-core](assets/images/core.svg)
@@ -25,12 +15,12 @@ Yarx comes from the reverse spelling of `x-r-a-y`, and it can fully automaticall
 ## Try with xray
 
 ```bash
-./xray webscan --plugins phantasm --html-output yarx.html --url https://yarx.koalr.me
+./xray webscan --plugins phantasm --html-output yarx.html --url http://yarx.koalr.me:8080
 ```
 
 ![running](./assets/images/scan.gif)
 
-After a few second, you will get a vulnerablity report  like that:  [report.html](https://yarx.koalr.me/report.html)
+After a few second, you will get a vulnerablity report  like that:  [report.html](https://yarx.koalr.me:8080/report.html)
 
 
 ## Installation

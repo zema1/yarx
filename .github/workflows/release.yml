@@ -1,0 +1,55 @@
+name: Go
+
+on:
+  push:
+    tags:
+    - v*
+    branches: 
+    - ci/*
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    env:
+      CGO_ENABLED: 0
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+        
+    - name: Make release dir
+      run: mkdir release
+      
+    - name: Build linux release
+      run: |
+        GOOS=linux GOARCH=amd64 go build -v -trimpath -ldflags "-w -s" -o release/yarx_linux_amd64
+        GOOS=linux GOARCH=386 go build -v -trimpath -ldflags "-w -s" -o release/yarx_linux_386
+        GOOS=linux GOARCH=arm64 go build -v -trimpath -ldflags "-w -s" -o release/yarx_linux_arm64
+        
+    - name: Build windows release
+      run: |
+        GOOS=windows GOARCH=amd64 go build -v -trimpath -ldflags "-w -s" -o release/yarx_windows_amd64
+        GOOS=windows GOARCH=386 go build -v -trimpath -ldflags "-w -s" -o release/yarx_windows_386
+        
+    - name: Build darwin release
+      run: |
+        GOOS=darwin GOARCH=amd64 go build -v -trimpath -ldflags "-w -s" -o release/yarx_darwin_amd64
+        GOOS=darwin GOARCH=arm64 go build -v -trimpath -ldflags "-w -s" -o release/yarx_darwin_arm64
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        draft: true
+        name: "v0.0.1"
+        tag_name: "v0.0.1"
+        files: |
+          release/yarx_linux_amd64
+          release/yarx_linux_386
+          release/yarx_linux_arm64
+          release/yarx_windows_amd64
+          release/yarx_windows_386
+          release/yarx_darwin_amd64
+          release/yarx_darwin_arm64

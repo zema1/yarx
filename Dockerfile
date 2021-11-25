@@ -25,4 +25,4 @@ EXPOSE 8080
 ENTRYPOINT ["./yarx"]
 VOLUME /html
 
-CMD ["-p", "./pocs", "-l", "0.0.0.0:8080", "-r", "./html"]
+CMD ["-p", "./pocs", "-l", "0.0.0.0:8080", "-r", "/html"]

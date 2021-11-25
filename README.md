@@ -3,8 +3,8 @@
 </div>
 
 <p align="center">
-    <a href="http://yarx.koalr.me:8080/"><b>在线体验</b></a>&nbsp;&nbsp;&nbsp;
-    <a href="http://yarx.koalr.me:8080/report.html"><b>漏洞报告</b></a> 
+    <a href="https://yarx.koalr.me/"><b>在线体验</b></a>&nbsp;&nbsp;&nbsp;
+    <a href="https://yarx.koalr.me/report.html"><b>漏洞报告</b></a> 
 </p>
 
 ## Yarx 是什么
@@ -30,12 +30,12 @@ Yarx 来自于 `x-r-a-y` 的反向拼写，它能够根据 xray 的 yaml poc 规
 ## 立即尝试
 
 ```bash
-./xray webscan --plugins phantasm --html-output yarx.html --url http://yarx.koalr.me:8080
+./xray webscan --plugins phantasm --html-output yarx.html --url https://yarx.koalr.me
 ```
 
 ![running](./assets/images/scan.gif)
 
-几秒钟后你就会得到一个类似的漏洞报告:  [report.html](http://yarx.koalr.me:8080/report.html)
+几秒钟后你就会得到一个类似的漏洞报告:  [report.html](https://yarx.koalr.me/report.html)
 
 
 ## 安装

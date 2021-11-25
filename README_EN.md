@@ -3,8 +3,8 @@
 </div>
 
 <p align="center">
-    <a href="http://yarx.koalr.me:8080/"><b>Demo</b></a>&nbsp;&nbsp;&nbsp;
-    <a href="http://yarx.koalr.me:8080/report.html"><b>Report</b></a> 
+    <a href="https://yarx.koalr.me/"><b>Demo</b></a>&nbsp;&nbsp;&nbsp;
+    <a href="https://yarx.koalr.me/report.html"><b>Report</b></a> 
 </p>
 
 
@@ -25,12 +25,12 @@ Yarx comes from the reverse spelling of `x-r-a-y`, and it can fully automaticall
 ## Try with xray
 
 ```bash
-./xray webscan --plugins phantasm --html-output yarx.html --url http://yarx.koalr.me:8080
+./xray webscan --plugins phantasm --html-output yarx.html --url https://yarx.koalr.me
 ```
 
 ![running](./assets/images/scan.gif)
 
-After a few second, you will get a vulnerablity report  like that:  [report.html](http://yarx.koalr.me:8080/report.html)
+After a few second, you will get a vulnerablity report  like that:  [report.html](https://yarx.koalr.me/report.html)
 
 
 ## Installation

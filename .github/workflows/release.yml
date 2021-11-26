@@ -66,6 +66,7 @@ jobs:
         draft: true
         name: "v0.0.1"
         tag_name: "v0.0.1"
+        body_path: ./release.md
         files: |
           release/yarx_linux_amd64.zip
           release/yarx_linux_386.zip

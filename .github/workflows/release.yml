@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CGO_ENABLED: 0
+      BUILD_FLAGS: -trimpath -ldflags "-w -s" -o
     steps:
     - uses: actions/checkout@v2
 
@@ -25,21 +26,28 @@ jobs:
       run: mkdir release
       
     - name: Build linux release
+      env:
+        GOOS: linux
       run: |
-        GOOS=linux GOARCH=amd64 go build -v -trimpath -ldflags "-w -s" -o release/yarx_linux_amd64
-        GOOS=linux GOARCH=386 go build -v -trimpath -ldflags "-w -s" -o release/yarx_linux_386
-        GOOS=linux GOARCH=arm64 go build -v -trimpath -ldflags "-w -s" -o release/yarx_linux_arm64
+        GOARCH=amd64 go build ${{ BUILD_FLAGS }} release/yarx_linux_amd64 ./cmd/yarx
+        GOARCH=386   go build ${{ BUILD_FLAGS }} release/yarx_linux_386   ./cmd/yarx
+        GOARCH=arm64 go build ${{ BUILD_FLAGS }} release/yarx_linux_arm64 ./cmd/yarx
         
     - name: Build windows release
+      env:
+        GOOS: windows
       run: |
-        GOOS=windows GOARCH=amd64 go build -v -trimpath -ldflags "-w -s" -o release/yarx_windows_amd64
-        GOOS=windows GOARCH=386 go build -v -trimpath -ldflags "-w -s" -o release/yarx_windows_386
+        GOARCH=amd64 go build ${{ BUILD_FLAGS }} release/yarx_windows_amd64.exe ./cmd/yarx
+        GOARCH=386   go build ${{ BUILD_FLAGS }} release/yarx_windows_386.exe   ./cmd/yarx
         
     - name: Build darwin release
+      env:
+        GOOS: darwin
       run: |
-        GOOS=darwin GOARCH=amd64 go build -v -trimpath -ldflags "-w -s" -o release/yarx_darwin_amd64
-        GOOS=darwin GOARCH=arm64 go build -v -trimpath -ldflags "-w -s" -o release/yarx_darwin_arm64
-    - name: Release
+        GOARCH=amd64 go build ${{ BUILD_FLAGS }} release/yarx_darwin_amd64 ./cmd/yarx
+        GOARCH=arm64 go build ${{ BUILD_FLAGS }} release/yarx_darwin_arm64 ./cmd/yarx
+
+    - name: Upload release
       uses: softprops/action-gh-release@v1
       with:
         draft: true

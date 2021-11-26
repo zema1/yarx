@@ -29,23 +29,23 @@ jobs:
       env:
         GOOS: linux
       run: |
-        GOARCH=amd64 go build ${{ BUILD_FLAGS }} release/yarx_linux_amd64 ./cmd/yarx
-        GOARCH=386   go build ${{ BUILD_FLAGS }} release/yarx_linux_386   ./cmd/yarx
-        GOARCH=arm64 go build ${{ BUILD_FLAGS }} release/yarx_linux_arm64 ./cmd/yarx
+        GOARCH=amd64 go build ${{ env.BUILD_FLAGS }} release/yarx_linux_amd64 ./cmd/yarx
+        GOARCH=386   go build ${{ env.BUILD_FLAGS }} release/yarx_linux_386   ./cmd/yarx
+        GOARCH=arm64 go build ${{ env.BUILD_FLAGS }} release/yarx_linux_arm64 ./cmd/yarx
         
     - name: Build windows release
       env:
         GOOS: windows
       run: |
-        GOARCH=amd64 go build ${{ BUILD_FLAGS }} release/yarx_windows_amd64.exe ./cmd/yarx
-        GOARCH=386   go build ${{ BUILD_FLAGS }} release/yarx_windows_386.exe   ./cmd/yarx
+        GOARCH=amd64 go build ${{ env.BUILD_FLAGS }} release/yarx_windows_amd64.exe ./cmd/yarx
+        GOARCH=386   go build ${{ env.BUILD_FLAGS }} release/yarx_windows_386.exe   ./cmd/yarx
         
     - name: Build darwin release
       env:
         GOOS: darwin
       run: |
-        GOARCH=amd64 go build ${{ BUILD_FLAGS }} release/yarx_darwin_amd64 ./cmd/yarx
-        GOARCH=arm64 go build ${{ BUILD_FLAGS }} release/yarx_darwin_arm64 ./cmd/yarx
+        GOARCH=amd64 go build ${{ env.BUILD_FLAGS }} release/yarx_darwin_amd64 ./cmd/yarx
+        GOARCH=arm64 go build ${{ env.BUILD_FLAGS }} release/yarx_darwin_arm64 ./cmd/yarx
 
     - name: Upload release
       uses: softprops/action-gh-release@v1
@@ -57,7 +57,7 @@ jobs:
           release/yarx_linux_amd64
           release/yarx_linux_386
           release/yarx_linux_arm64
-          release/yarx_windows_amd64
-          release/yarx_windows_386
+          release/yarx_windows_amd64.exe
+          release/yarx_windows_386.exe
           release/yarx_darwin_amd64
           release/yarx_darwin_arm64

@@ -55,7 +55,7 @@ jobs:
       run: |
         cd release
         cp -r ../pocs ./ && ls -alh
-        find . -name 'yarx_*' -type f -exec zip -r {}.zip -9 {{},pocs} \; rm {} \;
+        find . -name 'yarx_*' -type f -exec zip -r {}.zip -9 {{},pocs} \; -exec rm {} \;
         rm -rf ./pocs && ls
         find . ! -name 'sha256.txt' -type f -exec shasum -a 256 {} \; > sha256.txt
         ls -alh

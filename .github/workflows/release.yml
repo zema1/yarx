@@ -54,10 +54,11 @@ jobs:
     - name: Zip Release
       run: |
         cd release
-        cp -r ../pocs ./ && ls
-        find . -name "yarx_*" -type f -exec zip -r {}.zip {{},pocs} \; rm {} \;
+        cp -r ../pocs ./ && ls -alh
+        find . -name 'yarx_*' -type f -exec zip -r {}.zip -9 {{},pocs} \; rm {} \;
         rm -rf ./pocs && ls
         find . ! -name 'sha256.txt' -type f -exec shasum -a 256 {} \; > sha256.txt
+        ls -alh
 
     - name: Upload release
       uses: softprops/action-gh-release@v1

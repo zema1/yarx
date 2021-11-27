@@ -4,8 +4,6 @@ on:
   push:
     tags:
     - v*
-    branches: 
-    - ci/*
 
 jobs:
 
@@ -64,7 +62,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         draft: false
-        body_path: release.md
+        body_path: .github/workflows/release.md
         files: |
           release/yarx_linux_amd64.zip
           release/yarx_linux_386.zip

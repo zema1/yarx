@@ -1,0 +1,74 @@
+name: Build And Release
+
+on:
+  push:
+    tags:
+    - v*
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    env:
+      CGO_ENABLED: 0
+      BUILD_FLAGS: -trimpath -ldflags "-w -s" -o
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+        
+    - name: Make release dir
+      run: mkdir release
+    
+    - name: Install Package
+      run: |
+        sudo apt install -y zip
+      
+    - name: Build linux release
+      env:
+        GOOS: linux
+      run: |
+        GOARCH=amd64 go build ${{ env.BUILD_FLAGS }} release/yarx_linux_amd64 ./cmd/yarx
+        GOARCH=386   go build ${{ env.BUILD_FLAGS }} release/yarx_linux_386   ./cmd/yarx
+        GOARCH=arm64 go build ${{ env.BUILD_FLAGS }} release/yarx_linux_arm64 ./cmd/yarx
+        
+    - name: Build windows release
+      env:
+        GOOS: windows
+      run: |
+        GOARCH=amd64 go build ${{ env.BUILD_FLAGS }} release/yarx_windows_amd64.exe ./cmd/yarx
+        GOARCH=386   go build ${{ env.BUILD_FLAGS }} release/yarx_windows_386.exe   ./cmd/yarx
+        
+    - name: Build darwin release
+      env:
+        GOOS: darwin
+      run: |
+        GOARCH=amd64 go build ${{ env.BUILD_FLAGS }} release/yarx_darwin_amd64 ./cmd/yarx
+        GOARCH=arm64 go build ${{ env.BUILD_FLAGS }} release/yarx_darwin_arm64 ./cmd/yarx
+    
+    - name: Zip Release
+      run: |
+        cd release
+        cp -r ../pocs ./ && ls -alh
+        find . -name 'yarx_*' -type f -exec zip -r {}.zip -9 {{},pocs} \; -exec rm {} \;
+        rm -rf ./pocs && ls
+        find . ! -name 'sha256.txt' -type f -exec shasum -a 256 {} \; > sha256.txt
+        ls -alh
+
+    - name: Upload release
+      uses: softprops/action-gh-release@v1
+      with:
+        draft: false
+        body_path: .github/workflows/release.md
+        files: |
+          release/yarx_linux_amd64.zip
+          release/yarx_linux_386.zip
+          release/yarx_linux_arm64.zip
+          release/yarx_windows_amd64.exe.zip
+          release/yarx_windows_386.exe.zip
+          release/yarx_darwin_amd64.zip
+          release/yarx_darwin_arm64.zip
+          release/sha256.txt

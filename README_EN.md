@@ -8,7 +8,7 @@
 </p>
 
 
-Yarx comes from the reverse spelling of `x-r-a-y`, and it can fully automatically generate a Server that satisfies the rules according to xray's yaml poc rules. Scanning the server with xray will get a dozen of  corresponding vulnerabilities.
+Yarx comes from the reverse spelling of `x-r-a-y`, and it can fully automatically generate a Server that satisfies the rules according to xray's yaml poc rules. Scanning the server with xray will get dozens of corresponding vulnerabilities.
 
 ![yarx-core](assets/images/core.svg)
 

@@ -59,23 +59,11 @@ jobs:
         rm -rf ./pocs && ls
         find . ! -name 'sha256.txt' -type f -exec shasum -a 256 {} \; > sha256.txt
         ls -alh
-        echo "world"
-        pwd
-
-    - name: Temp Test
-      run: |
-        env
-        echo ${{ github.workspace }}
-        echo "hello"
-        pwd
-        ls -alh
 
     - name: Upload release
       uses: softprops/action-gh-release@v1
       with:
-        draft: true
-        name: "v0.0.1"
-        tag_name: "v0.0.1"
+        draft: false
         body_path: release.md
         files: |
           release/yarx_linux_amd64.zip

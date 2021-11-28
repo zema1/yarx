@@ -3,6 +3,7 @@ name: Docker Hub
 on:
   push:
     branches:
+      - 'main'
       - 'ci/*'
     tags:
       - 'v*'

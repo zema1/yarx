@@ -61,7 +61,7 @@ jobs:
     - name: Upload release
       uses: softprops/action-gh-release@v1
       with:
-        draft: false
+        draft: true
         body_path: .github/workflows/release.md
         files: |
           release/yarx_linux_amd64.zip

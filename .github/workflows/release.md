@@ -1,16 +1,6 @@
-正式发布第一版，这个版本基本实现了最初的设想。
-
-## 核心原理
-
-https://koalr.me/posts/core-concept-of-yarx/
-
 ## 更新说明
 
-- 支持 status、header、body 等位置的响应变换
-- 支持 `==` `contains` `submatch` 等各种匹配模式
-- 支持动态变量的渲染和捕获以及多级规则的变量追踪
-- 支持绝大部分内置函数的解析和调用
-- 通过路由合并和智能排序等策略有效减少路由冲突
-- 平铺式规则处理逻辑，支持并发扫描
-- 支持捕获扫描事件做进一步分析联动
+- 修复 302 响应 location 为空导致的报错问题
+- 增加 action 自动构建打包二进制
+- 增加 docker 镜像, 可以通过 `docker pull zemal/yarx:latest` 拉取使用
 

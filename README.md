@@ -27,6 +27,8 @@ Yarx 来自于 `x-r-a-y` 的反向拼写，它能够根据 xray 的 yaml poc 规
 + 平铺式规则处理逻辑，支持并发扫描
 + 支持捕获扫描事件做进一步分析联动
 
+核心原理: [https://koalr.me/posts/core-concept-of-yarx/](https://koalr.me/posts/core-concept-of-yarx/)
+
 ## 立即尝试
 
 ```bash
@@ -43,7 +45,12 @@ Yarx 来自于 `x-r-a-y` 的反向拼写，它能够根据 xray 的 yaml poc 规
 
   [https://github.com/zema1/yarx/releases](https://github.com/zema1/yarx/releases)
   下载合适的版本然后从命令行运行即可
-
+  
++ Docker Hub
+  ```bash
+  docker pull zemal/yarx:latest
+  ```
+  
 + 源码安装
   ```bash
   git clone https://github.com/zema1/yarx
@@ -137,6 +144,6 @@ Yarx 在解析 poc 的过程中可能会出现错误，这些 poc 不会被加�
 
 ## 规划
 
-- [ ] 支持 Docker 一键部署
+- [x] 支持 Docker 一键部署
 - [ ] 支持依赖反连平台的 POC
 - [ ] 支持依赖 request 的 POC

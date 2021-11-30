@@ -22,6 +22,8 @@ Yarx comes from the reverse spelling of `x-r-a-y`, and it can fully automaticall
 + Support for capturing scan events for further analysis and linkage
 + Support concurrent scans
 
+Core concept of yarx: [https://koalr.me/posts/core-concept-of-yarx/](https://koalr.me/posts/core-concept-of-yarx/)
+
 ## Try with xray
 
 ```bash
@@ -38,7 +40,12 @@ After a few second, you will get a vulnerablity report  like that:  [report.html
   
   [https://github.com/zema1/yarx/releases](https://github.com/zema1/yarx/releases) 
   Download the release suitable for your platform and run it in cli.
-  
+
++ Docker Hub
+  ```bash
+  docker pull zemal/yarx:latest
+  ```
+
 + Compile Source
   ```bash
   git clone https://github.com/zema1/yarx
@@ -134,6 +141,6 @@ If you encounter other types of errors, you can submit an issue with the yaml po
 
 ## Roadmap
 
-- [ ] Support for Docker deployments
+- [x] Support for Docker deployments
 - [ ] Support for POCs that rely on `newReverse` variable
 - [ ] Support for POCs that rely on `request` variable

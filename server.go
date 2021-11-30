@@ -120,8 +120,14 @@ func (h *RegexpHandler) run(route *route, body []byte, w http.ResponseWriter, r 
 	for k, v := range fakeResp.HeaderMap() {
 		w.Header().Set(k, v)
 	}
-	// todo: can this has a conflict?
+	// todo: can this have a conflict?
 	if len(fakeResp.status) != 0 {
+		// fix go 302 error:
+		// if the response is >300 and <400, the location must in response header
+		status := fakeResp.status[0]
+		if status > 300 && status < 400 && w.Header().Get("location") == "" {
+			w.Header().Set("location", r.URL.Path)
+		}
 		w.WriteHeader(fakeResp.status[0])
 	}
 	_, _ = w.Write(fakeResp.body)

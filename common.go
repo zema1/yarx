@@ -1,8 +1,12 @@
 package yarx
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/google/cel-go/checker/decls"
+	expr "google.golang.org/genproto/googleapis/api/expr/v1alpha1"
 	"net/url"
 	"regexp"
 	"sort"
@@ -14,8 +18,72 @@ var (
 	ErrRequestNotSupported = errors.New("request variable is not supported yet")
 )
 
+type CelContext struct {
+	eval       map[string]interface{}
+	vafDefines map[string]*expr.Type
+}
 
+func (c *CelContext) UnmarshalJSON(bytes []byte) error {
+	m := make(map[string]map[string]interface{})
+	err := json.Unmarshal(bytes, &m)
+	if err != nil {
+		return err
+	}
+	c.eval = m["eval"]
+	c.vafDefines = make(map[string]*expr.Type)
+	for key, ptInter := range m["defines"] {
+		ptFloat, ok := ptInter.(float64)
+		if !ok {
+			return fmt.Errorf("type convertion to float64 failed, %v", ptInter)
+		}
+		pt := expr.Type_PrimitiveType(ptFloat)
+		var t *expr.Type
+		switch pt {
+		case expr.Type_BYTES:
+			t = decls.Bytes
+			if c.eval[key] != nil {
+				if val, ok :=  c.eval[key].(string); ok {
+					base64.StdEncoding.De
+				}
+			}
+		case expr.Type_BOOL:
+			t = decls.Bool
+		case expr.Type_INT64:
+			t = decls.Int
+		case expr.Type_UINT64:
+			t = decls.Uint
+		case expr.Type_DOUBLE:
+			t = decls.Double
+		case expr.Type_STRING:
+			t = decls.String
+		default:
+			return fmt.Errorf("error type of primitiveType, %v", pt)
+		}
+		c.vafDefines[key] = t
+	}
+	return nil
+}
 
+func (c *CelContext) MarshalJSON() ([]byte, error) {
+	m := map[string]map[string]interface{}{
+		"eval":    c.eval,
+		"defines": {},
+	}
+	for key, t := range c.vafDefines {
+		if t.GetPrimitive() == expr.Type_PRIMITIVE_TYPE_UNSPECIFIED {
+			return nil, fmt.Errorf("unsupported types of %s", t)
+		}
+		m["defines"][key] = t.GetPrimitive()
+	}
+	return json.Marshal(m)
+}
+
+func NewCelContext() *CelContext {
+	return &CelContext{
+		eval:       make(map[string]interface{}),
+		vafDefines: make(map[string]*expr.Type),
+	}
+}
 
 var variableRegex = regexp.MustCompile(`{{([a-zA-Z0-9_]+)}}`)
 
@@ -60,7 +128,7 @@ func variableToRegexp(template string, varContext map[string]interface{}, withRa
 		template = strings.Replace(template, "\n", ".{1,2}?", -1)
 	}
 	template = "(?s)" + template
-	re, err :=  regexp.Compile(template)
+	re, err := regexp.Compile(template)
 	return re, replacedStr, err
 }
 

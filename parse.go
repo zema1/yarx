@@ -57,17 +57,17 @@ type MutationRule struct {
 	Header      map[string]*regexp.Regexp
 
 	Status      int
-	MutateFuncs []func(resp http.ResponseWriter, ctx *celContext) error
+	MutateFuncs []func(resp http.ResponseWriter, ctx *CelContext) error
 
 	ExprInfo *expr.SourceInfo
 	YamlRule *YamlRule
 
 	Chain *MutationChain
-	cel   *celContext
+	cel   *CelContext
 	level int
 }
 
-func NewMutationRule(celCtx *celContext) *MutationRule {
+func NewMutationRule(celCtx *CelContext) *MutationRule {
 	return &MutationRule{
 		cel: celCtx,
 	}
@@ -77,7 +77,7 @@ func (m *MutationRule) String() string {
 	return m.Chain.Name + "-" + m.Name
 }
 
-func (m *MutationRule) Match(req *http.Request, celCtx *celContext) error {
+func (m *MutationRule) Match(req *http.Request, celCtx *CelContext) error {
 	// extract vars from path
 	sortedURL := SortedURI(req.URL)
 	for k, v := range m.reSubMatchMap(m.URI, sortedURL, celCtx) {
@@ -104,7 +104,7 @@ func (m *MutationRule) Match(req *http.Request, celCtx *celContext) error {
 	}
 	return nil
 }
-func (m *MutationRule) reSubMatchMap(r *regexp.Regexp, str string, celCtx *celContext) map[string]interface{} {
+func (m *MutationRule) reSubMatchMap(r *regexp.Regexp, str string, celCtx *CelContext) map[string]interface{} {
 	match := r.FindStringSubmatch(str)
 	subMatchMap := make(map[string]string)
 	for i, name := range r.SubexpNames() {
@@ -165,19 +165,6 @@ func (m *MutationRule) HTTPHandler() http.HandlerFunc {
 	}
 }
 
-type celContext struct {
-	option     []cel.EnvOption
-	eval       map[string]interface{}
-	vafDefines map[string]*expr.Type
-}
-
-func newCelContext() *celContext {
-	return &celContext{
-		option:     nil,
-		eval:       make(map[string]interface{}),
-		vafDefines: make(map[string]*expr.Type),
-	}
-}
 
 type MutationChain struct {
 	sync.Mutex
@@ -268,7 +255,7 @@ func (y *Yarx) Parse(pocData []byte) error {
 			return err
 		}
 		rule.Name = ruleName
-		mutateRule := NewMutationRule(&celContext{
+		mutateRule := NewMutationRule(&CelContext{
 			vafDefines: varDefines,
 			eval:       evalMap,
 		})
@@ -292,7 +279,7 @@ func (y *Yarx) Parse(pocData []byte) error {
 	return nil
 }
 
-func (y *Yarx) parseExpr(expression string, rule *MutationRule) error {
+func (y *Yarx) ParseExpr(expression string, rule *MutationRule) error {
 	pr, _ := parser.NewParser()
 	parsed, commonErr := pr.Parse(common.NewTextSource(expression))
 	if len(commonErr.GetErrors()) != 0 {
@@ -431,13 +418,13 @@ func (y *Yarx) getShortestExprPath(curExpr *expr.Expr, path []string) []string {
 }
 
 func (y *Yarx) genMutation(yamlRule *YamlRule, mutateRule *MutationRule) error {
-	if err := y.parseExpr(yamlRule.Expression, mutateRule); err != nil {
+	if err := y.ParseExpr(yamlRule.Expression, mutateRule); err != nil {
 		return fmt.Errorf("parsing expression of %s, %s", yamlRule.Name, err)
 	}
 
 	if len(yamlRule.Output.Content) != 0 {
 		// 这个 Rule 要单独做一些工作，然后合并到主 Rule
-		outputRule := NewMutationRule(&celContext{
+		outputRule := NewMutationRule(&CelContext{
 			eval:       make(map[string]interface{}),
 			vafDefines: make(map[string]*expr.Type),
 		})
@@ -446,7 +433,7 @@ func (y *Yarx) genMutation(yamlRule *YamlRule, mutateRule *MutationRule) error {
 				continue
 			}
 			value := yamlRule.Output.Content[i].Value
-			if err := y.parseExpr(value, outputRule); err != nil {
+			if err := y.ParseExpr(value, outputRule); err != nil {
 				return fmt.Errorf("parsing expression of %s, %s", yamlRule.Name, err)
 			}
 		}
@@ -460,7 +447,7 @@ func (y *Yarx) genMutation(yamlRule *YamlRule, mutateRule *MutationRule) error {
 		if err != nil {
 			return err
 		}
-		mutateRule.MutateFuncs = append(mutateRule.MutateFuncs, func(resp http.ResponseWriter, ctx *celContext) error {
+		mutateRule.MutateFuncs = append(mutateRule.MutateFuncs, func(resp http.ResponseWriter, ctx *CelContext) error {
 			for k, v := range metrics.HeaderMap() {
 				oldValue := resp.Header().Get(k)
 				resp.Header().Set(k, oldValue+v)
@@ -667,7 +654,7 @@ func (y *Yarx) onEqualLike(curExpr *expr.Expr, rule *MutationRule) error {
 	}
 	switch info.position {
 	case PositionBody:
-		rule.MutateFuncs = append(rule.MutateFuncs, func(resp http.ResponseWriter, ctx *celContext) error {
+		rule.MutateFuncs = append(rule.MutateFuncs, func(resp http.ResponseWriter, ctx *CelContext) error {
 			out, _, err := prg.Eval(ctx.eval)
 			if err != nil {
 				return err
@@ -695,7 +682,7 @@ func (y *Yarx) onEqualLike(curExpr *expr.Expr, rule *MutationRule) error {
 		rule.Status = status
 		return nil
 	case PositionHeader:
-		rule.MutateFuncs = append(rule.MutateFuncs, func(resp http.ResponseWriter, ctx *celContext) error {
+		rule.MutateFuncs = append(rule.MutateFuncs, func(resp http.ResponseWriter, ctx *CelContext) error {
 			out, _, err := prg.Eval(ctx.eval)
 			if err != nil {
 				return err
@@ -723,7 +710,7 @@ func (y *Yarx) onMatches(curExpr *expr.Expr, rule *MutationRule) error {
 	}
 	switch info.position {
 	case PositionBody:
-		rule.MutateFuncs = append(rule.MutateFuncs, func(resp http.ResponseWriter, ctx *celContext) error {
+		rule.MutateFuncs = append(rule.MutateFuncs, func(resp http.ResponseWriter, ctx *CelContext) error {
 			out, _, err := prg.Eval(ctx.eval)
 			if err != nil {
 				return err
@@ -736,7 +723,7 @@ func (y *Yarx) onMatches(curExpr *expr.Expr, rule *MutationRule) error {
 			return nil
 		})
 	case PositionHeader:
-		rule.MutateFuncs = append(rule.MutateFuncs, func(resp http.ResponseWriter, ctx *celContext) error {
+		rule.MutateFuncs = append(rule.MutateFuncs, func(resp http.ResponseWriter, ctx *CelContext) error {
 			out, _, err := prg.Eval(ctx.eval)
 			if err != nil {
 				return err
@@ -765,7 +752,7 @@ func (y *Yarx) onSubMatch(curExpr *expr.Expr, rule *MutationRule) error {
 	}
 	switch info.position {
 	case PositionBody:
-		rule.MutateFuncs = append(rule.MutateFuncs, func(resp http.ResponseWriter, ctx *celContext) error {
+		rule.MutateFuncs = append(rule.MutateFuncs, func(resp http.ResponseWriter, ctx *CelContext) error {
 			out, _, err := prg.Eval(ctx.eval)
 			if err != nil {
 				return err
@@ -778,7 +765,7 @@ func (y *Yarx) onSubMatch(curExpr *expr.Expr, rule *MutationRule) error {
 			return nil
 		})
 	case PositionHeader:
-		rule.MutateFuncs = append(rule.MutateFuncs, func(resp http.ResponseWriter, ctx *celContext) error {
+		rule.MutateFuncs = append(rule.MutateFuncs, func(resp http.ResponseWriter, ctx *CelContext) error {
 			out, _, err := prg.Eval(ctx.eval)
 			if err != nil {
 				return err
@@ -807,7 +794,7 @@ func (y *Yarx) onContains(curExpr *expr.Expr, rule *MutationRule) error {
 	}
 	switch info.position {
 	case PositionBody:
-		rule.MutateFuncs = append(rule.MutateFuncs, func(resp http.ResponseWriter, ctx *celContext) error {
+		rule.MutateFuncs = append(rule.MutateFuncs, func(resp http.ResponseWriter, ctx *CelContext) error {
 			out, _, err := prg.Eval(ctx.eval)
 			if err != nil {
 				return err
@@ -816,7 +803,7 @@ func (y *Yarx) onContains(curExpr *expr.Expr, rule *MutationRule) error {
 			return nil
 		})
 	case PositionHeader:
-		rule.MutateFuncs = append(rule.MutateFuncs, func(resp http.ResponseWriter, ctx *celContext) error {
+		rule.MutateFuncs = append(rule.MutateFuncs, func(resp http.ResponseWriter, ctx *CelContext) error {
 			out, _, err := prg.Eval(ctx.eval)
 			if err != nil {
 				return err

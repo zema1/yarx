@@ -38,8 +38,8 @@ response.status == 201 &&
 "root:[x*]:0:0:".bmatches(response.body) && 
 response.headers["location"] == "https://www.du1x3r12.com" && 
 response.headers["Set-Cookie"].contains("new-cookie")`
-	rule := NewMutationRule(newCelContext())
-	assert.Nil(yr.parseExpr(toTest, rule))
+	rule := NewMutationRule(NewCelContext())
+	assert.Nil(yr.ParseExpr(toTest, rule))
 
 	var fakeResp RespMetrics
 	for _, fn := range rule.MutateFuncs {
